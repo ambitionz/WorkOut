@@ -257,7 +257,7 @@ function updatePrHighlight() {
 }
 
 function updateWeeklyComparison() {
-  const grouped = groupWorkoutsByWeek([...state.history, sanitizeWorkout(state.workout)]);
+  const grouped = groupWorkoutsByWeek(getHistoryWithCurrentWorkout());
   const sortedWeeks = Object.keys(grouped).sort();
 
   if (sortedWeeks.length < 2) {
@@ -297,7 +297,7 @@ function groupWorkoutsByWeek(workouts) {
 }
 
 function renderChart() {
-  const weeklyMap = groupWorkoutsByWeek([...state.history, sanitizeWorkout(state.workout)]);
+  const weeklyMap = groupWorkoutsByWeek(getHistoryWithCurrentWorkout());
   const labels = Object.keys(weeklyMap).sort();
   const values = labels.map((label) => weeklyMap[label]);
 
@@ -405,6 +405,12 @@ function importHistoryFromJson(event) {
 
       state.history = parsed.map(sanitizeWorkout).sort((a, b) => a.date.localeCompare(b.date));
       localStorage.setItem(WORKOUT_STORAGE_KEY, JSON.stringify(state.history));
+      const latestWorkout = state.history[state.history.length - 1] || null;
+      if (latestWorkout) {
+        localStorage.setItem(LAST_WORKOUT_KEY, JSON.stringify(latestWorkout));
+      } else {
+        localStorage.removeItem(LAST_WORKOUT_KEY);
+      }
       refreshAllDerivedViews();
       window.alert('History imported successfully.');
     } catch (error) {
@@ -416,6 +422,14 @@ function importHistoryFromJson(event) {
   };
 
   reader.readAsText(file);
+}
+
+function getHistoryWithCurrentWorkout() {
+  const current = sanitizeWorkout(state.workout);
+  const merged = state.history.filter((entry) => entry.date !== current.date);
+  merged.push(current);
+  merged.sort((a, b) => a.date.localeCompare(b.date));
+  return merged;
 }
 
 function getIsoWeekKey(dateString) {
