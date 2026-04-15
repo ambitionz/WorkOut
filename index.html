@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workout Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <h1>Workout Tracker</h1>
+      <div class="header-controls">
+        <label class="date-field">
+          Workout Date
+          <input id="workout-date" type="date" />
+        </label>
+        <button id="autofill-btn" class="secondary">Autofill Last Workout</button>
+        <button id="copy-btn" class="secondary">Load Previous Workout</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="exercise-grid" class="exercise-grid"></section>
+
+      <section class="summary-card">
+        <div class="summary-item">
+          <span>Daily Volume</span>
+          <strong id="daily-volume">0 kg</strong>
+        </div>
+        <div class="summary-item">
+          <span>Best Workout (PR)</span>
+          <strong id="pr-volume">0 kg</strong>
+        </div>
+        <div class="summary-item">
+          <span>Next Week Comparison</span>
+          <strong id="week-comparison">No previous week data</strong>
+        </div>
+      </section>
+
+      <section class="actions">
+        <button id="save-btn" class="primary">Save Workout</button>
+        <button id="export-btn" class="secondary">Export JSON</button>
+        <label for="import-input" class="secondary fake-button">Import JSON</label>
+        <input id="import-input" type="file" accept="application/json" />
+      </section>
+
+      <section class="chart-card">
+        <h2>Weekly Volume Progress</h2>
+        <canvas id="weekly-chart" aria-label="Weekly volume chart" role="img"></canvas>
+      </section>
+    </main>
+  </div>
+
+  <template id="exercise-card-template">
+    <article class="exercise-card">
+      <div class="exercise-head">
+        <input class="exercise-name" type="text" maxlength="60" />
+        <div class="exercise-volume" data-exercise-volume>0 kg</div>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Set #</th>
+              <th>Weight (kg)</th>
+              <th>Reps</th>
+              <th>Fails</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </article>
+  </template>
+
+  <template id="set-row-template">
+    <tr>
+      <td class="set-number"></td>
+      <td><input class="weight-input" type="number" min="0" step="0.5" inputmode="decimal" /></td>
+      <td>
+        <div class="rep-cell">
+          <button class="rep-btn rep-minus" type="button" aria-label="Decrease reps">−</button>
+          <input class="reps-input" type="number" min="0" step="1" inputmode="numeric" />
+          <button class="rep-btn rep-plus" type="button" aria-label="Increase reps">+</button>
+        </div>
+      </td>
+      <td><input class="fail-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0" /></td>
+    </tr>
+  </template>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
