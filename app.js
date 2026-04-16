@@ -18,7 +18,36 @@ const dom = {
   importInput: document.querySelector('#import-input'),
   exerciseTemplate: document.querySelector('#exercise-card-template'),
   setTemplate: document.querySelector('#set-row-template'),
-  weeklyChart: document.querySelector('#weekly-chart')
+  weeklyChart: document.querySelector('#weekly-chart'),
+  feedbackModal: document.querySelector('#feedback-modal'),
+  feedbackModalTitle: document.querySelector('#feedback-modal-title'),
+  feedbackModalMessage: document.querySelector('#feedback-modal-message'),
+  feedbackModalIcon: document.querySelector('#feedback-modal-icon'),
+  feedbackModalIconGlyph: document.querySelector('#feedback-modal-icon i'),
+  feedbackModalAction: document.querySelector('#feedback-modal-action')
+};
+
+const feedbackModalTones = {
+  info: {
+    icon: 'bi-info-circle-fill',
+    iconClasses: 'text-primary bg-primary-subtle',
+    buttonClass: 'btn-primary'
+  },
+  success: {
+    icon: 'bi-check2-circle',
+    iconClasses: 'text-success bg-success-subtle',
+    buttonClass: 'btn-success'
+  },
+  warning: {
+    icon: 'bi-exclamation-triangle-fill',
+    iconClasses: 'text-warning bg-warning-subtle',
+    buttonClass: 'btn-warning'
+  },
+  danger: {
+    icon: 'bi-x-octagon-fill',
+    iconClasses: 'text-danger bg-danger-subtle',
+    buttonClass: 'btn-danger'
+  }
 };
 
 const state = {
@@ -112,7 +141,11 @@ function wireEvents() {
   dom.copyBtn.addEventListener('click', () => {
     const prev = loadWorkout();
     if (!prev) {
-      window.alert('No previous workout found.');
+      showFeedbackModal({
+        title: 'No Previous Workout',
+        message: 'There is no saved workout yet to load.',
+        tone: 'warning'
+      });
       return;
     }
     applyWorkoutToUI(prev, { keepCurrentDate: true });
@@ -121,7 +154,11 @@ function wireEvents() {
   dom.autofillBtn.addEventListener('click', () => {
     const prev = loadWorkout();
     if (!prev) {
-      window.alert('No workout to autofill from yet.');
+      showFeedbackModal({
+        title: 'Nothing to Autofill',
+        message: 'Save one workout first, then you can autofill the last session.',
+        tone: 'warning'
+      });
       return;
     }
     autofillFromWorkout(prev);
@@ -171,7 +208,11 @@ function saveWorkout() {
   state.history.sort((a, b) => a.date.localeCompare(b.date));
   localStorage.setItem(WORKOUT_STORAGE_KEY, JSON.stringify(state.history));
   localStorage.setItem(LAST_WORKOUT_KEY, JSON.stringify(sanitized));
-  window.alert('Workout saved.');
+  showFeedbackModal({
+    title: 'Workout Saved',
+    message: 'Your workout has been saved to local history.',
+    tone: 'success'
+  });
 }
 
 function loadWorkout() {
@@ -412,10 +453,18 @@ function importHistoryFromJson(event) {
         localStorage.removeItem(LAST_WORKOUT_KEY);
       }
       refreshAllDerivedViews();
-      window.alert('History imported successfully.');
+      showFeedbackModal({
+        title: 'Import Complete',
+        message: 'Workout history was imported successfully.',
+        tone: 'success'
+      });
     } catch (error) {
       console.error(error);
-      window.alert('Failed to import JSON file. Ensure correct format.');
+      showFeedbackModal({
+        title: 'Import Failed',
+        message: 'Failed to import JSON file. Ensure the file format is correct.',
+        tone: 'danger'
+      });
     } finally {
       dom.importInput.value = '';
     }
@@ -461,4 +510,43 @@ function formatDateInput(date) {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function showFeedbackModal({ title = 'Notice', message, tone = 'info', actionLabel = 'Got it' }) {
+  if (!dom.feedbackModal || !dom.feedbackModalTitle || !dom.feedbackModalMessage) {
+    window.alert(message);
+    return;
+  }
+
+  const feedbackTone = feedbackModalTones[tone] || feedbackModalTones.info;
+
+  dom.feedbackModalTitle.textContent = title;
+  dom.feedbackModalMessage.textContent = message;
+
+  if (dom.feedbackModalIcon && dom.feedbackModalIconGlyph) {
+    dom.feedbackModalIcon.className = `feedback-modal-icon mx-auto ${feedbackTone.iconClasses}`;
+    dom.feedbackModalIconGlyph.className = `bi ${feedbackTone.icon}`;
+  }
+
+  if (dom.feedbackModalAction) {
+    dom.feedbackModalAction.textContent = actionLabel;
+    dom.feedbackModalAction.className = `btn ${feedbackTone.buttonClass} px-4`;
+    dom.feedbackModalAction.setAttribute('data-bs-dismiss', 'modal');
+  }
+
+  const feedbackModal = getFeedbackModalInstance();
+  if (!feedbackModal) {
+    window.alert(message);
+    return;
+  }
+
+  feedbackModal.show();
+}
+
+function getFeedbackModalInstance() {
+  if (!dom.feedbackModal || !window.bootstrap?.Modal) {
+    return null;
+  }
+
+  return window.bootstrap.Modal.getOrCreateInstance(dom.feedbackModal);
 }
