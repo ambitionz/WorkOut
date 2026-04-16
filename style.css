@@ -175,12 +175,34 @@ main {
 }
 
 .table-wrapper {
-  overflow-x: auto;
+  overflow-x: hidden;
 }
 
 .table {
   --bs-table-bg: transparent;
   --bs-table-border-color: rgba(148, 163, 184, 0.18);
+}
+
+.set-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.set-table th:nth-child(1),
+.set-table td:nth-child(1) {
+  width: 14%;
+}
+
+.set-table th:nth-child(2),
+.set-table td:nth-child(2),
+.set-table th:nth-child(4),
+.set-table td:nth-child(4) {
+  width: 23%;
+}
+
+.set-table th:nth-child(3),
+.set-table td:nth-child(3) {
+  width: 40%;
 }
 
 .table thead th {
@@ -198,6 +220,18 @@ main {
   vertical-align: middle;
 }
 
+.set-table thead th,
+.set-table tbody td {
+  padding-left: 0.35rem;
+  padding-right: 0.35rem;
+}
+
+.set-table .form-control {
+  min-width: 0;
+  padding-left: 0.35rem;
+  padding-right: 0.35rem;
+}
+
 .set-number {
   min-width: 56px;
   font-weight: 700;
@@ -205,13 +239,13 @@ main {
 
 .rep-cell {
   display: grid;
-  grid-template-columns: 34px minmax(62px, 1fr) 34px;
-  gap: 0.4rem;
+  grid-template-columns: 30px minmax(0, 1fr) 30px;
+  gap: 0.25rem;
   align-items: center;
 }
 
 .rep-btn {
-  padding: 0.35rem;
+  padding: 0.25rem;
   line-height: 1;
 }
 
